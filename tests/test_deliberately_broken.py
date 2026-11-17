@@ -2,4 +2,5 @@
 
 
 def test_this_must_fail() -> None:
-    assert 1 == 2, "deliberate failure to prove CI catches it"
+    actual = [1, 2]
+    assert actual == [1, 3], "deliberate runtime failure to prove CI catches it"
