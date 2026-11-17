@@ -1,9 +1,19 @@
 import os
 from importlib.metadata import version
+from typing import Annotated
 
 from fastmcp import FastMCP
 from mcp_types import ToolAnnotations
-from pydantic import BaseModel
+from pydantic import BaseModel, StringConstraints
+
+# The schema is the only thing an agent sees, so the limits live there: min/max
+# length are visible as minLength/maxLength, and `pattern` says the name must
+# contain a non-space character. Stripping first makes "  Ada  " usable rather
+# than a validation failure an agent cannot explain.
+Name = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=80, pattern=r"\S"),
+]
 
 INSTRUCTIONS = """
 Greets people by name. There is one tool, `greet`: pass the person's name and it
@@ -26,7 +36,7 @@ class Greeting(BaseModel):
         open_world_hint=False,
     )
 )
-def greet(name: str) -> Greeting:
+def greet(name: Name) -> Greeting:
     """Greet someone by name."""
     return Greeting(message=f"Hello, {name}!")
 
