@@ -1,4 +1,5 @@
 import os
+import sys
 from importlib.metadata import version
 from typing import Annotated
 
@@ -41,10 +42,22 @@ def greet(name: Name) -> Greeting:
     return Greeting(message=f"Hello, {name}!")
 
 
-def serve(port: int = 8000) -> None:
-    """Run the server over streamable HTTP on `port`."""
+def serve(transport: str = "http", port: int = 8000) -> None:
+    """Serve over streamable HTTP, or over stdio for an agent that spawns us."""
+    if transport == "stdio":
+        mcp.run(transport="stdio")
+        return
     mcp.run(transport="http", port=port)
 
 
+def main(argv: list[str] | None = None) -> None:
+    """`--stdio` serves stdio; otherwise HTTP on MCP_PORT. Nothing else is accepted."""
+    args = sys.argv[1:] if argv is None else argv
+    unknown = [arg for arg in args if arg != "--stdio"]
+    if unknown:
+        raise SystemExit(f"unknown arguments: {' '.join(unknown)}; the only flag is --stdio (port comes from MCP_PORT)")
+    serve("stdio" if "--stdio" in args else "http", int(os.environ.get("MCP_PORT", "8000")))
+
+
 if __name__ == "__main__":
-    serve(int(os.environ.get("MCP_PORT", "8000")))
+    main()

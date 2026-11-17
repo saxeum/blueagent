@@ -13,10 +13,10 @@ sync: ## Install every workspace member (`uv sync` alone skips them)
 migrate: ## Apply pending orders migrations (ORDERAPI_DB, default orders.db)
 	uv run --package orderapi python -m orderapi.migrate
 
-mcp: ## Run the greet MCP server on port 8000 (foreground)
+mcp: ## Run the greet MCP server over HTTP on :8000 for curl/exploration
 	uv run --package greetmcp python -m greetmcp.server
 
-agent: ## Ask the agent to call greet over MCP (needs DEEPSEEK_API_KEY, and make mcp running)
+agent: ## Ask the agent to call greet (spawns the server over stdio; MCP_URL= to use HTTP)
 	uv run python -m newmcp.agent
 
 test: ## Run the tests (MCP over the protocol, API over TestClient)
