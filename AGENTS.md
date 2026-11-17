@@ -32,10 +32,22 @@ green from memory, and do not "fix" a finding by disabling the rule unless the h
 `newmcp` and `orderapi` declared as first-party), so all three are reproducible gates. The same
 three run in `.github/workflows/test.yml`, which the required `test` check on `master` uses.
 
-## Never commit
+## Issues, commits and pull requests
 
-Do not commit, stage, amend, or push. Leave every change in the working tree, including new
-files, and finish by naming what should be reviewed:
+One issue per change, one small PR per issue, several small commits inside it — each commit
+one idea, so a reviewer can read them in order. Never batch unrelated changes into one PR,
+and never grow a PR after it has been reviewed: a correction is a new branch from that point.
+
+Open the issue first (`gh issue create` with what/why/acceptance), reference it in the PR
+body, and keep the acceptance block runnable — a fenced block holding only the command, with
+the expected result written below it.
+
+Commit and push only on a feature branch. Never push to `master`, never merge a PR, never
+approve your own work. The human reviews and merges.
+
+The PR body is the review artefact, so it carries: what changed and why, the commands run
+with their real output, what was deliberately left out, and any trade-off a reviewer must
+decide rather than discover. Hand over with the branch name and base SHA:
 
 ```bash
 git rev-parse --abbrev-ref HEAD
@@ -44,6 +56,3 @@ git rev-parse --abbrev-ref HEAD
 ```bash
 git rev-parse --short HEAD
 ```
-
-Report it in one line, e.g. `branch master, base b476508` — the human reviews that SHA
-against `git diff <sha>` plus `git status --short` for untracked files, and commits themselves.
