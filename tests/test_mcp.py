@@ -7,7 +7,8 @@ from importlib.metadata import version
 
 import pytest
 from fastmcp import Client
-from pydantic import BaseModel
+from mcp_types import TextContent
+from pydantic import BaseModel, Field
 
 
 class ToolSchema(BaseModel):
@@ -15,6 +16,19 @@ class ToolSchema(BaseModel):
 
     properties: dict[str, object]
     required: list[str]
+
+
+class StringSchema(BaseModel):
+    """A constrained string property as JSON Schema spells it.
+
+    The aliases are required, not defaulted: a schema that lost its constraints
+    should fail validation here rather than assert against zeros.
+    """
+
+    type: str
+    min_length: int = Field(alias="minLength")
+    max_length: int = Field(alias="maxLength")
+    pattern: str = ""
 
 
 def test_initialize_reports_this_servers_identity(server_url: str) -> None:
@@ -77,7 +91,59 @@ def test_greet_declares_read_only_annotations(server_url: str) -> None:
     asyncio.run(check())
 
 
-@pytest.mark.parametrize(("name", "expected"), [("Ada", "Hello, Ada!"), ("Grace", "Hello, Grace!")])
+@pytest.mark.parametrize(
+    ("name", "reason"),
+    [("", "at least 1 character"), ("x" * 81, "at most 80 characters"), ("   ", "validation")],
+)
+def test_name_constraints_are_enforced(server_url: str, name: str, reason: str) -> None:
+    """The limits are in the schema, so a bad name fails validation with a reason."""
+
+    async def check() -> None:
+        async with Client(server_url) as client:
+            result = await client.call_tool("greet", {"name": name}, raise_on_error=False)
+            assert result.is_error is True
+            block = result.content[0]
+            assert isinstance(block, TextContent)
+            text = block.text.lower()
+            assert reason in text or "validation error" in text
+
+    asyncio.run(check())
+
+
+def test_name_constraints_appear_in_the_schema(server_url: str) -> None:
+    async def check() -> None:
+        async with Client(server_url) as client:
+            tools = {tool.name: tool for tool in await client.list_tools()}
+            properties = ToolSchema.model_validate(tools["greet"].input_schema).properties
+            schema = StringSchema.model_validate(properties["name"])
+            assert schema.min_length == 1
+            assert schema.max_length == 80
+            assert schema.pattern
+
+    asyncio.run(check())
+
+
+def test_surrounding_whitespace_is_trimmed(server_url: str) -> None:
+    async def check() -> None:
+        async with Client(server_url) as client:
+            result = await client.call_tool("greet", {"name": "  Ada  "})
+            assert result.structured_content == {"message": "Hello, Ada!"}
+
+    asyncio.run(check())
+
+
+@pytest.mark.parametrize(
+    ("name", "expected"),
+    [
+        ("Ada", "Hello, Ada!"),
+        ("Grace", "Hello, Grace!"),
+        # Multi-word, hyphenated and accented names must pass the schema's pattern:
+        # it means "contains a non-space character", not "is a single token".
+        ("George Treacy", "Hello, George Treacy!"),
+        ("Mary Jane Watson-Parker", "Hello, Mary Jane Watson-Parker!"),
+        ("José Álvarez", "Hello, José Álvarez!"),
+    ],
+)
 def test_call_greet(server_url: str, name: str, expected: str) -> None:
     async def check() -> None:
         async with Client(server_url) as client:
