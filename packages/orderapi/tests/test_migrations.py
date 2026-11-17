@@ -7,8 +7,9 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from orderapi.db import applied_versions, apply_migrations, connect, migration_files
 from pydantic import TypeAdapter
+
+from orderapi.db import applied_versions, apply_migrations, connect, migration_files
 
 
 @pytest.fixture
