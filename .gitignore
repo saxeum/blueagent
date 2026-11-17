@@ -13,3 +13,6 @@ wheels/
 orders.db
 .ruff_cache/
 .pytest_cache/
+
+# Local secrets (see .env.example)
+.env
