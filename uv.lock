@@ -540,12 +540,14 @@ version = "0.1.0"
 source = { editable = "packages/greetmcp" }
 dependencies = [
     { name = "fastmcp" },
+    { name = "mcp-types" },
     { name = "pydantic" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "fastmcp", specifier = ">=4.2.1" },
+    { name = "mcp-types", specifier = ">=2.3.0" },
     { name = "pydantic", specifier = ">=2.14.3" },
 ]
 

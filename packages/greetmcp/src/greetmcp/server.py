@@ -2,6 +2,7 @@ import os
 from importlib.metadata import version
 
 from fastmcp import FastMCP
+from mcp_types import ToolAnnotations
 from pydantic import BaseModel
 
 INSTRUCTIONS = """
@@ -18,7 +19,13 @@ class Greeting(BaseModel):
     message: str
 
 
-@mcp.tool
+@mcp.tool(
+    annotations=ToolAnnotations(
+        title="Greet someone",
+        read_only_hint=True,
+        open_world_hint=False,
+    )
+)
 def greet(name: str) -> Greeting:
     """Greet someone by name."""
     return Greeting(message=f"Hello, {name}!")
