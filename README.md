@@ -30,8 +30,8 @@ uv-documented layout for "a root project with accompanying packages", and it kee
 ```
 make                    # help
 make sync               # uv sync --all-packages
-make mcp                # greet MCP server on :8000
-make agent              # ask the agent to call greet over MCP
+make mcp                # greet MCP server over HTTP on :8000, for curl
+make agent              # ask the agent to call greet
 make migrate            # apply pending migrations to ORDERAPI_DB (CI/CD step)
 make crud               # orders CRUD API on :8001
 make test               # agent + MCP protocol + API + migrations
@@ -39,12 +39,13 @@ make check              # basedpyright over the workspace
 make build              # every wheel into dist/
 ```
 
-`make agent` needs the server running (`make mcp`) and a model key. Configuration:
+`make agent` needs only a model key — it starts the server itself (see Transports).
+Configuration:
 
 | Variable | Default | Used by |
 |---|---|---|
-| `MCP_PORT` | `8000` | server (`python -m greetmcp.server`) |
-| `MCP_URL` | `http://127.0.0.1:8000/mcp` | agent (`python -m newmcp.agent`) |
+| `MCP_PORT` | `8000` | HTTP server (`python -m greetmcp.server`) |
+| `MCP_URL` | unset | agent (`python -m newmcp.agent`); unset means spawn the server over stdio, set means connect to that HTTP endpoint |
 | `AGENT_MODEL` | `deepseek:deepseek-flash` | agent; any pydantic-ai model id |
 | `DEEPSEEK_API_KEY` | — | agent; read from the environment or a local `.env` |
 
@@ -56,10 +57,25 @@ Tools return pydantic models, so a result arrives as `structuredContent`
 wrapper. The tool schemas are the contract the agent sees — nothing on the client
 side re-describes them.
 
-Watch out for the one that bites: **plain `uv sync` installs the root package but
-not the members**, so `import greetmcp` fails until you run `uv sync --all-packages`
-(which is what `make sync` does). Likewise `uv run --package orderapi ...` syncs
-that member on demand.
+Watch out for the one that bites: **plain `uv sync` installs the root package and its
+dependencies, not every member.** `greetmcp` is a dependency of the root, so it comes
+along; `orderapi` is not, so `import orderapi` fails until `uv sync --all-packages`
+(which is what `make sync` does). `uv run --package orderapi ...` syncs it on demand.
+
+## Transports
+
+Two, split by who is using them:
+
+| | Command | Transport |
+|---|---|---|
+| Agent | `make agent` | **stdio** — the agent spawns `python -m greetmcp.server --stdio` itself |
+| Humans, curl | `make mcp` | **HTTP** on `:8000`, sessions and JSON-RPC visible over the wire |
+
+The agent uses HTTP only when you point it at a server with `MCP_URL`. Everything else
+— no port, no prerequisite "start the server first" — is why stdio is the agent's
+default: an agent host spawns its MCP servers, it does not expect to find one already
+listening. HTTP stays because raw protocol observation needs it; every wire-level check
+in this repo is a `curl` against `make mcp`.
 
 ## The agent
 

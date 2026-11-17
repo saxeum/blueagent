@@ -9,20 +9,30 @@ from __future__ import annotations
 
 import asyncio
 import os
+import sys
 
 from dotenv import load_dotenv
+from fastmcp.client.transports import StdioTransport
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPToolset
 from pydantic_ai.models import Model
 
-URL = os.environ.get("MCP_URL", "http://127.0.0.1:8000/mcp")
+# Set MCP_URL to talk to a server someone else is running over HTTP; leave it
+# unset and the agent spawns the server itself over stdio, which is the transport
+# an agent host uses.
+URL = os.environ.get("MCP_URL")
+STDIO = StdioTransport(command=sys.executable, args=["-m", "greetmcp.server", "--stdio"])
 MODEL = os.environ.get("AGENT_MODEL", "deepseek:deepseek-flash")
 PROMPT = "Use the greet tool to greet Ada, then reply with what the tool returned."
 
 
-def build_agent(model: Model | str = MODEL, url: str = URL) -> Agent[None, str]:
-    """Agent with the MCP server's tools attached; the transport follows the URL."""
-    return Agent(model, toolsets=[MCPToolset(url)])
+def build_agent(model: Model | str = MODEL, url: str | None = URL) -> Agent[None, str]:
+    """Agent with the MCP server's tools attached.
+
+    A url means HTTP to that endpoint; no url means spawn the server over stdio.
+    """
+    toolset = MCPToolset(url) if url else MCPToolset(STDIO)
+    return Agent(model, toolsets=[toolset])
 
 
 async def ask(prompt: str) -> str:

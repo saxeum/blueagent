@@ -8,9 +8,14 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "fastmcp>=4.2.1",
+    "greetmcp",
     "pydantic-ai-slim[mcp,openai]>=2.69.0",
     "python-dotenv>=1.2.4",
 ]
+
+[tool.uv.sources]
+greetmcp = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.13.0,<0.14.0"]

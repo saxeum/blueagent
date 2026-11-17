@@ -824,6 +824,8 @@ name = "newmcp"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "fastmcp" },
+    { name = "greetmcp" },
     { name = "pydantic-ai-slim", extra = ["mcp", "openai"] },
     { name = "python-dotenv" },
 ]
@@ -837,6 +839,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "fastmcp", specifier = ">=4.2.1" },
+    { name = "greetmcp", editable = "packages/greetmcp" },
     { name = "pydantic-ai-slim", extras = ["mcp", "openai"], specifier = ">=2.69.0" },
     { name = "python-dotenv", specifier = ">=1.2.4" },
 ]
@@ -1117,6 +1121,7 @@ dependencies = [
     { name = "pydantic" },
     { name = "typing-inspection" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/fe/0c/48ec1a5a68ccd8c5819ffcc2567635ec5b231d12f9881ed50e73a6f4f504/pydantic_graph-2.69.0.tar.gz", hash = "sha256:de750c4b671a60b4648f0357cc713418c64f57703c873bde3ceacfd58da9a42f", size = 47714, upload-time = "2026-11-17T01:53:06.284Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7b/35/34b37f3bb73140c6ba58fa5c242b798c7632da3a509f66767f7fe13d0e39/pydantic_graph-2.69.0-py3-none-any.whl", hash = "sha256:bef3065672c6cfaf93c09d7c7ada858fa4475ecdd6f77eafd8a26b3643368f9a", size = 54877, upload-time = "2026-11-17T01:52:55.958Z" },
 ]
