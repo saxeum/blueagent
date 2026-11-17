@@ -12,3 +12,4 @@ wheels/
 # Local run artefacts
 orders.db
 .ruff_cache/
+.pytest_cache/

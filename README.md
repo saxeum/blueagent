@@ -9,9 +9,8 @@ they are exercised against. Everything is a uv workspace.
 pyproject.toml              workspace root: the `newmcp` package, members under packages/
 uv.lock                     one lockfile for the whole workspace
 src/newmcp/
-    my_server.py            FastMCP server, port 8000, exposes `greet`
+    my_server.py            FastMCP server over HTTP, exposes `greet`
     my_client.py            lists the server's tools, then calls `greet`
-    main.py                 `newmcp` console script
 packages/orderapi/          workspace member: toy orders API, port 8001
     pyproject.toml          owns its own dependencies (fastapi, uvicorn)
     src/orderapi/main.py    SQLite CRUD over an orders table
@@ -30,9 +29,21 @@ make sync               # uv sync --all-packages
 make mcp                # MCP server on :8000
 make client             # list tools, call greet
 make crud               # orders CRUD API on :8001
+make test               # MCP over the protocol + API through TestClient
 make check              # basedpyright over the workspace
 make build              # both wheels into dist/
 ```
+
+Configuration, one knob per side of the connection:
+
+| Variable | Default | Used by |
+|---|---|---|
+| `MCP_PORT` | `8000` | server (`python -m newmcp.my_server`) |
+| `MCP_URL` | `http://127.0.0.1:8000/mcp` | client (`python -m newmcp.my_client`) |
+
+Tools return pydantic models, so a result arrives as `structuredContent`
+(`{"message": "Hello, Ada!"}` for `greet`) with no FastMCP `{"result": ...}`
+wrapper. Clients validate that shape rather than trusting it.
 
 Watch out for the one that bites: **plain `uv sync` installs the root package but
 not the members**, so `import orderapi` fails until you run `uv sync --all-packages`

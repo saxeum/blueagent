@@ -1,9 +1,10 @@
 import asyncio
+import os
 
 from fastmcp import Client
 from pydantic import BaseModel
 
-URL = "http://127.0.0.1:8000/mcp"
+URL = os.environ.get("MCP_URL", "http://127.0.0.1:8000/mcp")
 
 
 class ToolInputSchema(BaseModel):
@@ -16,10 +17,10 @@ class ToolInputSchema(BaseModel):
     properties: dict[str, object] = {}
 
 
-class GreetResult(BaseModel):
+class Greeting(BaseModel):
     """Shape of what `greet` returns."""
 
-    result: str
+    message: str
 
 
 async def main(url: str = URL) -> None:
@@ -29,7 +30,7 @@ async def main(url: str = URL) -> None:
             print(f"{tool.name}({', '.join(schema.properties)}): {tool.description}")
 
         result = await client.call_tool("greet", {"name": "George"})
-        print(GreetResult.model_validate(result.structured_content).result)
+        print(Greeting.model_validate(result.structured_content).message)
 
 
 if __name__ == "__main__":

@@ -12,8 +12,6 @@ import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-DB_PATH = os.environ.get("ORDERAPI_DB", "orders.db")
-
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,7 +46,8 @@ class OrderPatch(BaseModel):
 
 
 def connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
+    # Read per connection, so tests can point each run at its own database.
+    conn = sqlite3.connect(os.environ.get("ORDERAPI_DB", "orders.db"))
     conn.row_factory = sqlite3.Row
     return conn
 
