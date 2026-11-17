@@ -2,25 +2,15 @@
 
 from __future__ import annotations
 
-import os
 import sqlite3
-from collections.abc import AsyncGenerator, Iterator
-from contextlib import asynccontextmanager
+from collections.abc import Iterator
 from typing import Annotated
 
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    customer TEXT NOT NULL,
-    item TEXT NOT NULL,
-    quantity INTEGER NOT NULL DEFAULT 1,
-    status TEXT NOT NULL DEFAULT 'pending'
-)
-"""
+from orderapi.db import connect, rows
 
 
 class OrderInput(BaseModel):
@@ -45,13 +35,6 @@ class OrderPatch(BaseModel):
     status: str | None = None
 
 
-def connect() -> sqlite3.Connection:
-    # Read per connection, so tests can point each run at its own database.
-    conn = sqlite3.connect(os.environ.get("ORDERAPI_DB", "orders.db"))
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
 def get_db() -> Iterator[sqlite3.Connection]:
     conn = connect()
     try:
@@ -61,11 +44,6 @@ def get_db() -> Iterator[sqlite3.Connection]:
 
 
 Db = Annotated[sqlite3.Connection, Depends(get_db)]
-
-
-def rows(db: sqlite3.Connection, sql: str, params: tuple[object, ...] = ()) -> list[object]:
-    """Fetch rows as opaque objects; sqlite3 types them Any, so to_order proves them."""
-    return list(db.execute(sql, params).fetchall())
 
 
 def to_order(row: object) -> Order:
@@ -83,14 +61,7 @@ def fetch(db: sqlite3.Connection, order_id: int) -> Order:
     return to_order(found[0])
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
-    with connect() as conn:
-        _ = conn.executescript(SCHEMA)
-    yield
-
-
-app = FastAPI(title="Order API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Order API", version="0.1.0")
 
 
 @app.get("/orders")

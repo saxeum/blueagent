@@ -1,7 +1,7 @@
 # Toy drivers for the MCP server (root package) and the orders CRUD API (workspace member).
 
 .DEFAULT_GOAL := help
-.PHONY: help sync mcp client crud test check build
+.PHONY: help sync migrate mcp client crud test check build
 
 help: ## Show this help
 	@grep -hE '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -9,6 +9,9 @@ help: ## Show this help
 
 sync: ## Install every workspace member (`uv sync` alone skips them)
 	uv sync --all-packages
+
+migrate: ## Apply pending orders migrations (ORDERAPI_DB, default orders.db)
+	uv run --package orderapi python -m orderapi.migrate
 
 mcp: ## Run the MCP server on port 8000 (foreground)
 	uv run python -m newmcp.my_server

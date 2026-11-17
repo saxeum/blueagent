@@ -14,6 +14,9 @@ src/newmcp/
 packages/orderapi/          workspace member: toy orders API, port 8001
     pyproject.toml          owns its own dependencies (fastapi, uvicorn)
     src/orderapi/main.py    SQLite CRUD over an orders table
+    src/orderapi/db.py      connection + forward-only migration runner
+    src/orderapi/migrate.py `python -m orderapi.migrate`, run by `make migrate`
+    src/orderapi/migrations/  0001 schema, 0002 seed data
 Makefile                    `make` prints the available targets
 ```
 
@@ -28,6 +31,7 @@ make                    # help
 make sync               # uv sync --all-packages
 make mcp                # MCP server on :8000
 make client             # list tools, call greet
+make migrate            # apply pending migrations to ORDERAPI_DB (CI/CD step)
 make crud               # orders CRUD API on :8001
 make test               # MCP over the protocol + API through TestClient
 make check              # basedpyright over the workspace
@@ -53,7 +57,14 @@ that member on demand.
 ## The CRUD API
 
 SQLite file `orders.db` in the working directory, overridable with `ORDERAPI_DB`.
-The table is created on startup. Endpoints:
+
+The schema comes from `migrations/*.sql`. Nothing is migrated at startup: run
+`make migrate` (`python -m orderapi.migrate`) as a CI/CD step before serving, and
+again after adding a migration. The runner records each version in
+`schema_migrations`, so `0002_seed_orders.sql`'s five orders are inserted once, ever.
+
+On a database that has never been migrated the API returns `500` — the app is
+deliberately unaware of migrations and does not create tables. Endpoints:
 
 | Method | Path | Notes |
 |---|---|---|
@@ -74,6 +85,14 @@ What a workspace does **not** give you, per the uv docs: dependency isolation at
 import time. A single venv serves the whole workspace, so `newmcp` *can* import
 `fastapi` if someone writes that line — uv cannot stop it. Members are separate
 packages, not separate environments.
+
+## Tests
+
+`make test` runs two suites. `tests/test_mcp.py` drives a real server process through
+the MCP protocol. `packages/orderapi/tests/` covers the API and the migration runner;
+each API test migrates a throwaway database with the same runner `make migrate` uses,
+then empties it so the test creates every row it asserts on — the seed data is for
+local poking, not for tests.
 
 ## Type checking
 
