@@ -1,7 +1,7 @@
 # Toy drivers for the MCP server (root package) and the orders CRUD API (workspace member).
 
 .DEFAULT_GOAL := help
-.PHONY: help sync migrate mcp client crud test check build
+.PHONY: help sync migrate mcp agent crud test check build
 
 help: ## Show this help
 	@grep -hE '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -13,11 +13,11 @@ sync: ## Install every workspace member (`uv sync` alone skips them)
 migrate: ## Apply pending orders migrations (ORDERAPI_DB, default orders.db)
 	uv run --package orderapi python -m orderapi.migrate
 
-mcp: ## Run the MCP server on port 8000 (foreground)
-	uv run python -m newmcp.my_server
+mcp: ## Run the greet MCP server on port 8000 (foreground)
+	uv run --package greetmcp python -m greetmcp.server
 
-client: ## List the server's tools, then call greet
-	uv run python -m newmcp.my_client
+agent: ## Ask the agent to call greet over MCP (needs DEEPSEEK_API_KEY, and make mcp running)
+	uv run python -m newmcp.agent
 
 test: ## Run the tests (MCP over the protocol, API over TestClient)
 	uv run pytest -q

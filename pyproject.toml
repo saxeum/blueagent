@@ -1,15 +1,15 @@
 [project]
 name = "newmcp"
 version = "0.1.0"
-description = "MCP server and client, plus the toy API they are tested against"
+description = "Agent that drives an MCP server, plus the tools it talks to"
 readme = "README.md"
 authors = [
     { name = "zuchat", email = "62874892+gmtreacy@users.noreply.github.com" }
 ]
 requires-python = ">=3.14"
 dependencies = [
-    "fastmcp>=4.2.1",
-    "pydantic>=2.14.3",
+    "pydantic-ai-slim[mcp,openai]>=2.69.0",
+    "python-dotenv>=1.2.4",
 ]
 
 [build-system]
@@ -30,7 +30,7 @@ members = ["packages/*"]
 target-version = "py314"
 
 [tool.ruff.lint.isort]
-known-first-party = ["newmcp", "orderapi"]
+known-first-party = ["greetmcp", "newmcp", "orderapi"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "packages/orderapi/tests"]
