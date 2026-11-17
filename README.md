@@ -1,4 +1,4 @@
-# newmcp
+# blueagent
 
 A minimal agent, the MCP (Model Context Protocol) server it drives, and a toy CRUD
 API to wrap later. Everything is a uv workspace: the agent is the root project, the
@@ -7,9 +7,9 @@ servers are members.
 ## Layout
 
 ```
-pyproject.toml              workspace root: the `newmcp` agent package
+pyproject.toml              workspace root: the `blueagent` agent package
 uv.lock                     one lockfile for the whole workspace
-src/newmcp/agent.py         pydantic-ai agent; tools come from an MCP server over HTTP
+src/blueagent/agent.py      pydantic-ai agent; tools come from an MCP server over HTTP
 packages/greetmcp/          member: the MCP server, exposes `greet`, port 8000
     src/greetmcp/server.py  FastMCP over streamable HTTP
 packages/orderapi/          member: toy orders API, port 8001
@@ -21,7 +21,7 @@ packages/orderapi/          member: toy orders API, port 8001
 Makefile                    `make` prints the available targets
 ```
 
-The root project is `newmcp` (the agent); `packages/*` are members. That is the
+The root project is `blueagent` (the agent); `packages/*` are members. That is the
 uv-documented layout for "a root project with accompanying packages", and it keeps
 `uv run` pointed at the agent while members are reachable with `--package`.
 
@@ -45,7 +45,7 @@ Configuration:
 | Variable | Default | Used by |
 |---|---|---|
 | `MCP_PORT` | `8000` | HTTP server (`python -m greetmcp.server`) |
-| `MCP_URL` | unset | agent (`python -m newmcp.agent`); unset means spawn the server over stdio, set means connect to that HTTP endpoint |
+| `MCP_URL` | unset | agent (`python -m blueagent.agent`); unset means spawn the server over stdio, set means connect to that HTTP endpoint |
 | `AGENT_MODEL` | `deepseek:deepseek-flash` | agent; any pydantic-ai model id |
 | `DEEPSEEK_API_KEY` | — | agent; read from the environment or a local `.env` |
 
@@ -79,7 +79,7 @@ in this repo is a `curl` against `make mcp`.
 
 ## The agent
 
-`src/newmcp/agent.py` is deliberately tiny: one `Agent`, one toolset, one prompt.
+`src/blueagent/agent.py` is deliberately tiny: one `Agent`, one toolset, one prompt.
 
 ```python
 Agent(MODEL, toolsets=[MCPToolset(FastMCPClient(URL))])
