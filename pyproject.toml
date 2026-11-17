@@ -1,0 +1,31 @@
+[project]
+name = "newmcp"
+version = "0.1.0"
+description = "MCP server and client, plus the toy API they are tested against"
+readme = "README.md"
+authors = [
+    { name = "zuchat", email = "62874892+gmtreacy@users.noreply.github.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastmcp>=4.2.1",
+    "pydantic>=2.14.3",
+]
+
+[project.scripts]
+newmcp = "newmcp.main:main"
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.40.2",
+]
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.basedpyright]
+typeCheckingMode = "recommended"
