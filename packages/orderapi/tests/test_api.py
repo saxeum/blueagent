@@ -11,9 +11,10 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import TypeAdapter
+
 from orderapi.db import apply_migrations, connect
 from orderapi.main import Order, app
-from pydantic import TypeAdapter
 
 
 @pytest.fixture
