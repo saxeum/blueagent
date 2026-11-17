@@ -9,7 +9,7 @@ servers are members.
 ```
 pyproject.toml              workspace root: the `blueagent` agent package
 uv.lock                     one lockfile for the whole workspace
-src/blueagent/agent.py      pydantic-ai agent; tools come from an MCP server over HTTP
+src/blueagent/agent.py      pydantic-ai agent; tools come from the greet server (stdio, or HTTP via MCP_URL)
 packages/greetmcp/          member: the MCP server, exposes `greet`, port 8000
     src/greetmcp/server.py  FastMCP over streamable HTTP
 packages/orderapi/          member: toy orders API, port 8001
@@ -74,22 +74,25 @@ Two, split by who is using them:
 The agent uses HTTP only when you point it at a server with `MCP_URL`. Everything else
 — no port, no prerequisite "start the server first" — is why stdio is the agent's
 default: an agent host spawns its MCP servers, it does not expect to find one already
-listening. HTTP stays because raw protocol observation needs it; every wire-level check
-in this repo is a `curl` against `make mcp`.
+listening. HTTP stays because raw protocol observation needs it: `make mcp` serves it
+for hand-written `curl`, and the wire-level assertions in `tests/test_mcp.py` go
+through the SDK client, not through the Python API.
 
 ## The agent
 
 `src/blueagent/agent.py` is deliberately tiny: one `Agent`, one toolset, one prompt.
 
 ```python
-Agent(MODEL, toolsets=[MCPToolset(FastMCPClient(URL))])
+toolset = MCPToolset(url) if url else MCPToolset(STDIO)
+Agent(model, toolsets=[toolset])
 ```
 
-`MCPToolset` takes a client, and the client takes the URL — pydantic-ai V2 removed
-the older `MCPServerStreamableHTTP` class, so the transport is inferred from the
-argument rather than named. The agent knows nothing about `greet`; it discovers the
-tool from the server on connect, which is why a change to the server's schemas
-shows up in the agent without touching this file.
+`MCPToolset` takes anything FastMCP can build a transport from: here a URL string, which
+means streamable HTTP, or a `StdioTransport` that spawns
+`python -m greetmcp.server --stdio`. The transport is inferred from the argument, so
+neither one is named at the call site. The agent knows nothing about `greet`; it
+discovers the tool from the server on connect, which is why a change to the server's
+schemas shows up in the agent without touching this file.
 
 ## The CRUD API
 
