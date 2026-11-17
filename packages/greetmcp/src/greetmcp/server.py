@@ -1,9 +1,15 @@
 import os
+from importlib.metadata import version
 
 from fastmcp import FastMCP
 from pydantic import BaseModel
 
-mcp = FastMCP("My MCP Server")
+INSTRUCTIONS = """
+Greets people by name. There is one tool, `greet`: pass the person's name and it
+returns a message string. Nothing is persisted and nothing else is exposed.
+"""
+
+mcp = FastMCP("greetmcp", version=version("greetmcp"), instructions=INSTRUCTIONS)
 
 
 class Greeting(BaseModel):

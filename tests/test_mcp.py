@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from importlib.metadata import version
 
 import pytest
 from fastmcp import Client
@@ -14,6 +15,34 @@ class ToolSchema(BaseModel):
 
     properties: dict[str, object]
     required: list[str]
+
+
+def test_initialize_reports_this_servers_identity(server_url: str) -> None:
+    """Not the FastMCP library version, which is what a default server reports."""
+
+    async def check() -> None:
+        async with Client(server_url) as client:
+            # This client negotiates the modern `server/discover` era, where there
+            # is no InitializeResult; the metadata lives on the client itself.
+            info = client.server_info
+            assert info is not None
+            assert info.name == "greetmcp"
+            assert info.version == version("greetmcp")
+
+    asyncio.run(check())
+
+
+def test_initialize_advertises_instructions(server_url: str) -> None:
+    """An agent that only sees schemas needs to be told what the server is for."""
+
+    async def check() -> None:
+        async with Client(server_url) as client:
+            instructions = client.instructions
+            assert instructions is not None
+            assert "greet" in instructions
+            assert "name" in instructions
+
+    asyncio.run(check())
 
 
 def test_tools_list_exposes_greet(server_url: str) -> None:
