@@ -17,7 +17,7 @@ mcp: ## Run the greet MCP server over HTTP on :8000 for curl/exploration
 	uv run --package greetmcp python -m greetmcp.server
 
 agent: ## Ask the agent to call greet (spawns the server over stdio; MCP_URL= to use HTTP)
-	uv run python -m newmcp.agent
+	uv run python -m blueagent.agent
 
 test: ## Run the tests (MCP over the protocol, API over TestClient)
 	uv run pytest -q

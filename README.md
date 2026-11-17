@@ -1,4 +1,4 @@
-# newmcp
+# blueagent
 
 A minimal agent, the MCP (Model Context Protocol) server it drives, and a toy CRUD
 API to wrap later. Everything is a uv workspace: the agent is the root project, the
@@ -7,9 +7,9 @@ servers are members.
 ## Layout
 
 ```
-pyproject.toml              workspace root: the `newmcp` agent package
+pyproject.toml              workspace root: the `blueagent` agent package
 uv.lock                     one lockfile for the whole workspace
-src/newmcp/agent.py         pydantic-ai agent; tools come from an MCP server over HTTP
+src/blueagent/agent.py      pydantic-ai agent; tools come from the greet server (stdio, or HTTP via MCP_URL)
 packages/greetmcp/          member: the MCP server, exposes `greet`, port 8000
     src/greetmcp/server.py  FastMCP over streamable HTTP
 packages/orderapi/          member: toy orders API, port 8001
@@ -21,7 +21,7 @@ packages/orderapi/          member: toy orders API, port 8001
 Makefile                    `make` prints the available targets
 ```
 
-The root project is `newmcp` (the agent); `packages/*` are members. That is the
+The root project is `blueagent` (the agent); `packages/*` are members. That is the
 uv-documented layout for "a root project with accompanying packages", and it keeps
 `uv run` pointed at the agent while members are reachable with `--package`.
 
@@ -45,7 +45,7 @@ Configuration:
 | Variable | Default | Used by |
 |---|---|---|
 | `MCP_PORT` | `8000` | HTTP server (`python -m greetmcp.server`) |
-| `MCP_URL` | unset | agent (`python -m newmcp.agent`); unset means spawn the server over stdio, set means connect to that HTTP endpoint |
+| `MCP_URL` | unset | agent (`python -m blueagent.agent`); unset means spawn the server over stdio, set means connect to that HTTP endpoint |
 | `AGENT_MODEL` | `deepseek:deepseek-flash` | agent; any pydantic-ai model id |
 | `DEEPSEEK_API_KEY` | — | agent; read from the environment or a local `.env` |
 
@@ -74,22 +74,25 @@ Two, split by who is using them:
 The agent uses HTTP only when you point it at a server with `MCP_URL`. Everything else
 — no port, no prerequisite "start the server first" — is why stdio is the agent's
 default: an agent host spawns its MCP servers, it does not expect to find one already
-listening. HTTP stays because raw protocol observation needs it; every wire-level check
-in this repo is a `curl` against `make mcp`.
+listening. HTTP stays because raw protocol observation needs it: `make mcp` serves it
+for hand-written `curl`, and the wire-level assertions in `tests/test_mcp.py` go
+through the SDK client, not through the Python API.
 
 ## The agent
 
-`src/newmcp/agent.py` is deliberately tiny: one `Agent`, one toolset, one prompt.
+`src/blueagent/agent.py` is deliberately tiny: one `Agent`, one toolset, one prompt.
 
 ```python
-Agent(MODEL, toolsets=[MCPToolset(FastMCPClient(URL))])
+toolset = MCPToolset(url) if url else MCPToolset(STDIO)
+Agent(model, toolsets=[toolset])
 ```
 
-`MCPToolset` takes a client, and the client takes the URL — pydantic-ai V2 removed
-the older `MCPServerStreamableHTTP` class, so the transport is inferred from the
-argument rather than named. The agent knows nothing about `greet`; it discovers the
-tool from the server on connect, which is why a change to the server's schemas
-shows up in the agent without touching this file.
+`MCPToolset` takes anything FastMCP can build a transport from: here a URL string, which
+means streamable HTTP, or a `StdioTransport` that spawns
+`python -m greetmcp.server --stdio`. The transport is inferred from the argument, so
+neither one is named at the call site. The agent knows nothing about `greet`; it
+discovers the tool from the server on connect, which is why a change to the server's
+schemas shows up in the agent without touching this file.
 
 ## The CRUD API
 

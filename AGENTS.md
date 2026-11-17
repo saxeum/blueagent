@@ -1,4 +1,4 @@
-# Project instructions (newmcp)
+# Project instructions (blueagent)
 
 ## Python version
 
@@ -29,7 +29,7 @@ If a check fails: fix it, or say plainly which one fails and why. Do not report 
 green from memory, and do not "fix" a finding by disabling the rule unless the human says so.
 
 `ruff` is pinned in the `dev` group and configured in `pyproject.toml` (`[tool.ruff]`, with
-`newmcp` and `orderapi` declared as first-party), so all three are reproducible gates. The same
+`blueagent` and `orderapi` declared as first-party), so all three are reproducible gates. The same
 three run in `.github/workflows/test.yml`, which the required `test` check on `master` uses.
 
 ## Issues, commits and pull requests

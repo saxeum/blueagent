@@ -12,7 +12,7 @@ from pydantic_ai import AgentRunResult
 from pydantic_ai.messages import ModelResponse, ToolCallPart
 from pydantic_ai.models.test import TestModel
 
-from newmcp.agent import build_agent
+from blueagent.agent import build_agent
 
 
 def tool_names(result: AgentRunResult[str]) -> list[str]:
