@@ -5,6 +5,7 @@ description = "MCP server exposing the greet tool over streamable HTTP"
 requires-python = ">=3.14"
 dependencies = [
     "fastmcp>=4.2.1",
+    "mcp-types>=2.3.0",
     "pydantic>=2.14.3",
 ]
 

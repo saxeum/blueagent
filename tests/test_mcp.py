@@ -62,6 +62,21 @@ def test_tools_list_exposes_greet(server_url: str) -> None:
     asyncio.run(check())
 
 
+def test_greet_declares_read_only_annotations(server_url: str) -> None:
+    """Hosts gate auto-approval on these hints; undeclared means 'treat as risky'."""
+
+    async def check() -> None:
+        async with Client(server_url) as client:
+            tools = {tool.name: tool for tool in await client.list_tools()}
+            annotations = tools["greet"].annotations
+            assert annotations is not None
+            assert annotations.read_only_hint is True
+            assert annotations.open_world_hint is False
+            assert annotations.destructive_hint is not True
+
+    asyncio.run(check())
+
+
 @pytest.mark.parametrize(("name", "expected"), [("Ada", "Hello, Ada!"), ("Grace", "Hello, Grace!")])
 def test_call_greet(server_url: str, name: str, expected: str) -> None:
     async def check() -> None:
