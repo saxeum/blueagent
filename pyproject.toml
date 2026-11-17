@@ -1,5 +1,5 @@
 [project]
-name = "newmcp"
+name = "blueagent"
 version = "0.1.0"
 description = "Agent that drives an MCP server, plus the tools it talks to"
 readme = "README.md"
@@ -35,7 +35,7 @@ members = ["packages/*"]
 target-version = "py314"
 
 [tool.ruff.lint.isort]
-known-first-party = ["greetmcp", "newmcp", "orderapi"]
+known-first-party = ["blueagent", "greetmcp", "orderapi"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "packages/orderapi/tests"]
