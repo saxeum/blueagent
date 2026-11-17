@@ -1,8 +1,10 @@
 """Minimal pydantic-ai agent that calls the `greet` tool over MCP.
 
-`make agent` starts nothing itself: run the MCP server (`make mcp`) first, then
-this. The model is DeepSeek by default, read the same way pydantic-ai reads it —
-`DEEPSEEK_API_KEY` in the environment, or in a local `.env`.
+`make agent` needs no running server: with `MCP_URL` unset it spawns
+`python -m greetmcp.server --stdio` itself. Set `MCP_URL` to talk to a server
+someone else started (`make mcp`) over HTTP instead. The model is DeepSeek by
+default, read the same way pydantic-ai reads it — `DEEPSEEK_API_KEY` in the
+environment, or in a local `.env`.
 """
 
 from __future__ import annotations
