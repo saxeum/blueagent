@@ -2,6 +2,7 @@
 name = "greetmcp"
 version = "0.1.0"
 description = "MCP server exposing the greet tool over streamable HTTP"
+license = "MIT"
 requires-python = ">=3.14"
 dependencies = [
     "fastmcp>=4.2.1",

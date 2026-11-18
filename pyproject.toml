@@ -6,6 +6,8 @@ readme = "README.md"
 authors = [
     { name = "piagent", email = "62874892+gmtreacy@users.noreply.github.com" }
 ]
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.14"
 dependencies = [
     "fastmcp>=4.2.1",
