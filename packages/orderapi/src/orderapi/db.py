@@ -19,14 +19,16 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 """
 
 
-def connect() -> sqlite3.Connection:
-    # Read per connection, so tests can point each run at its own database.
-    conn = sqlite3.connect(os.environ.get("ORDERAPI_DB", "orders.db"))
+def connect(path: str | os.PathLike[str] | None = None) -> sqlite3.Connection:
+    """An explicit path wins; otherwise ORDERAPI_DB, so tests can point each run at its own database."""
+    conn = sqlite3.connect(path or os.environ.get("ORDERAPI_DB", "orders.db"))
     conn.row_factory = sqlite3.Row
     return conn
 
 
-def rows(conn: sqlite3.Connection, sql: str, params: tuple[object, ...] = ()) -> list[object]:
+def rows(
+    conn: sqlite3.Connection, sql: str, params: tuple[object, ...] = ()
+) -> list[object]:
     """Fetch rows as opaque objects; sqlite3 types them Any, so callers prove them."""
     return list(conn.execute(sql, params).fetchall())
 
@@ -58,7 +60,9 @@ def apply_migrations(conn: sqlite3.Connection) -> list[str]:
         if version in done:
             continue
         _ = conn.executescript(path.read_text())
-        _ = conn.execute("INSERT INTO schema_migrations (version) VALUES (?)", (version,))
+        _ = conn.execute(
+            "INSERT INTO schema_migrations (version) VALUES (?)", (version,)
+        )
         applied.append(version)
     conn.commit()
     return applied

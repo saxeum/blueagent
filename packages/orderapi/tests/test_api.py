@@ -14,7 +14,8 @@ from fastapi.testclient import TestClient
 from pydantic import TypeAdapter
 
 from orderapi.db import apply_migrations, connect
-from orderapi.main import Order, app
+from orderapi.main import app
+from orderapi.schemas import OrderResponse
 
 
 @pytest.fixture
@@ -30,15 +31,15 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClie
         yield test_client
 
 
-def create(client: TestClient, **overrides: object) -> Order:
+def create(client: TestClient, **overrides: object) -> OrderResponse:
     payload: dict[str, object] = {"customer": "Ada", "item": "widget"} | overrides
     response = client.post("/orders", json=payload)
     assert response.status_code == 201, response.text
-    return Order.model_validate_json(response.text)
+    return OrderResponse.model_validate_json(response.text)
 
 
-def list_orders(client: TestClient) -> list[Order]:
-    return TypeAdapter(list[Order]).validate_json(client.get("/orders").text)
+def list_orders(client: TestClient) -> list[OrderResponse]:
+    return TypeAdapter(list[OrderResponse]).validate_json(client.get("/orders").text)
 
 
 def test_empty_table_lists_nothing(client: TestClient) -> None:
@@ -55,7 +56,9 @@ def test_create_applies_defaults_and_returns_an_id(client: TestClient) -> None:
 
 
 def test_create_rejects_quantity_below_one(client: TestClient) -> None:
-    response = client.post("/orders", json={"customer": "Ada", "item": "widget", "quantity": 0})
+    response = client.post(
+        "/orders", json={"customer": "Ada", "item": "widget", "quantity": 0}
+    )
 
     assert response.status_code == 422
 
@@ -67,7 +70,9 @@ def test_get_missing_order_is_404(client: TestClient) -> None:
 def test_patch_changes_only_named_fields(client: TestClient) -> None:
     created = create(client)
 
-    patched = Order.model_validate_json(client.patch(f"/orders/{created.id}", json={"status": "shipped"}).text)
+    patched = OrderResponse.model_validate_json(
+        client.patch(f"/orders/{created.id}", json={"status": "shipped"}).text
+    )
 
     assert patched.status == "shipped"
     assert patched.customer == "Ada"
