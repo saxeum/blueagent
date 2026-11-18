@@ -1,34 +1,16 @@
 """CRUD tests for the orders API, through FastAPI's TestClient.
 
-Each test gets its own database: migrated with the same runner `make migrate` uses,
-then emptied so the test creates every row it asserts on.
+The `client` fixture (conftest.py) hands each test a migrated database with no
+rows, so the test creates everything it asserts on. The layers underneath have
+their own tests: test_service.py and test_repository.py.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from pathlib import Path
-
-import pytest
 from fastapi.testclient import TestClient
 from pydantic import TypeAdapter
 
-from orderapi.db import apply_migrations, connect
-from orderapi.main import app
 from orderapi.schemas import OrderResponse
-
-
-@pytest.fixture
-def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
-    monkeypatch.setenv("ORDERAPI_DB", str(tmp_path / "orders.db"))
-    with connect() as conn:
-        _ = apply_migrations(conn)
-        # The seed migration is for local poking; these tests bring their own rows.
-        _ = conn.execute("DELETE FROM orders")
-        _ = conn.execute("DELETE FROM sqlite_sequence WHERE name = 'orders'")
-        conn.commit()
-    with TestClient(app) as test_client:
-        yield test_client
 
 
 def create(client: TestClient, **overrides: object) -> OrderResponse:
