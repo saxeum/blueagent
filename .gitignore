@@ -16,3 +16,6 @@ orders.db
 
 # Local secrets (see .env.example)
 .env
+
+# Written by MCP hosts; paths in it are machine-specific (see .mcp.json.example)
+.mcp.json
