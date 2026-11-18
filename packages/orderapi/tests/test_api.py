@@ -1,4 +1,4 @@
-"""CRUD tests for the toy orders API, through FastAPI's TestClient.
+"""CRUD tests for the orders API, through FastAPI's TestClient.
 
 Each test gets its own database: migrated with the same runner `make migrate` uses,
 then emptied so the test creates every row it asserts on.
