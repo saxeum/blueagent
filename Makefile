@@ -1,4 +1,4 @@
-# Toy drivers for the MCP server (root package) and the orders CRUD API (workspace member).
+# Drivers for the MCP server (root package) and the orders CRUD API (workspace member).
 
 .DEFAULT_GOAL := help
 .PHONY: help sync migrate mcp agent crud test check build
