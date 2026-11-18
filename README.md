@@ -78,6 +78,30 @@ listening. HTTP stays because raw protocol observation needs it: `make mcp` serv
 for hand-written `curl`, and the wire-level assertions in `tests/test_mcp.py` go
 through the SDK client, not through the Python API.
 
+## Using this as an MCP server
+
+A host that reads `mcpServers` (Claude Code, Cursor, anything else following that shape)
+needs a JSON entry, not this repo's Python. `.mcp.json.example` carries one entry per
+transport; copy it to `.mcp.json` — gitignored, because the paths in it are yours — and
+keep the entry you want. Drop the other; nothing requires both.
+
+| Entry | Transport | Needs |
+|---|---|---|
+| `greetmcp-http` | streamable HTTP at `http://localhost:8000/mcp` | `make mcp` already running |
+| `greetmcp-stdio` | stdio, spawned by the host | `/absolute/path/to/blueagent` replaced with this checkout |
+
+Both reach the same one-tool server; the host connects to whichever transport it was
+given. The HTTP URL is the base **plus `/mcp`**, which is where FastMCP serves streamable
+HTTP — `http://localhost:8000` on its own will not connect. Change `MCP_PORT` and both
+the server and that URL move together.
+
+`--directory` is what makes the stdio entry work: without it `uv` looks for a project in
+the host's working directory, which is not this repo. It takes the checkout's path, so
+this is the one value that cannot be committed as-is.
+
+The agent in `src/blueagent/agent.py` deliberately does not read `.mcp.json`; it builds
+the same two transports itself, so it needs neither the file nor a running server.
+
 ## The agent
 
 `src/blueagent/agent.py` is deliberately tiny: one `Agent`, one toolset, one prompt.
