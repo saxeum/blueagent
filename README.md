@@ -1,6 +1,6 @@
 # blueagent
 
-A minimal agent, the MCP (Model Context Protocol) server it drives, and a toy CRUD
+A minimal agent, the MCP (Model Context Protocol) server it drives, and a CRUD
 API to wrap later. Everything is a uv workspace: the agent is the root project, the
 servers are members.
 
@@ -12,7 +12,7 @@ uv.lock                     one lockfile for the whole workspace
 src/blueagent/agent.py      pydantic-ai agent; tools come from the greet server (stdio, or HTTP via MCP_URL)
 packages/greetmcp/          member: the MCP server, exposes `greet`, port 8000
     src/greetmcp/server.py  FastMCP over streamable HTTP
-packages/orderapi/          member: toy orders API, port 8001
+packages/orderapi/          member: orders API, port 8001
     pyproject.toml          owns its own dependencies (fastapi, uvicorn)
     src/orderapi/main.py    SQLite CRUD over an orders table
     src/orderapi/db.py      connection + forward-only migration runner
@@ -117,7 +117,7 @@ deliberately unaware of migrations and does not create tables. Endpoints:
 ## Why a workspace here
 
 Three things are genuinely separate: the agent needs `pydantic-ai-slim`, the greet
-server needs `fastmcp`, the toy API needs `fastapi`. `uv tree --package` shows each
+server needs `fastmcp`, the orders API needs `fastapi`. `uv tree --package` shows each
 set under its own package. They share one `uv.lock`, so dependencies resolve
 together, and each builds its own wheel (`make build`).
 

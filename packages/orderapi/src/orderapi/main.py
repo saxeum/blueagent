@@ -1,4 +1,4 @@
-"""A toy CRUD REST API over an SQLite orders table, for exercising MCP tooling."""
+"""A CRUD REST API over an SQLite orders table, for exercising MCP tooling."""
 
 from __future__ import annotations
 
