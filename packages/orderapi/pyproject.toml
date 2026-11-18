@@ -2,6 +2,7 @@
 name = "orderapi"
 version = "0.1.0"
 description = "Toy CRUD REST API over an SQLite orders table"
+license = "MIT"
 requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.163.2",
