@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Agent that drives an MCP server, plus the tools it talks to"
 readme = "README.md"
 authors = [
-    { name = "zuchat", email = "62874892+gmtreacy@users.noreply.github.com" }
+    { name = "piagent", email = "62874892+gmtreacy@users.noreply.github.com" }
 ]
 requires-python = ">=3.14"
 dependencies = [
