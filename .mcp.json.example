@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "greetmcp-http": {
+      "type": "http",
+      "url": "http://localhost:8000/mcp"
+    },
+    "greetmcp-stdio": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/blueagent",
+        "--package",
+        "greetmcp",
+        "python",
+        "-m",
+        "greetmcp.server",
+        "--stdio"
+      ]
+    }
+  }
+}
