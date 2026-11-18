@@ -12,12 +12,19 @@ uv.lock                     one lockfile for the whole workspace
 src/blueagent/agent.py      pydantic-ai agent; tools come from the greet server (stdio, or HTTP via MCP_URL)
 packages/greetmcp/          member: the MCP server, exposes `greet`, port 8000
     src/greetmcp/server.py  FastMCP over streamable HTTP
-packages/orderapi/          member: orders API, port 8001
-    pyproject.toml          owns its own dependencies (fastapi, uvicorn)
-    src/orderapi/main.py    SQLite CRUD over an orders table
-    src/orderapi/db.py      connection + forward-only migration runner
-    src/orderapi/migrate.py `python -m orderapi.migrate`, run by `make migrate`
-    src/orderapi/migrations/  0001 schema, 0002 seed data
+packages/orderapi/                  member: orders API, port 8001
+    pyproject.toml                  owns its own dependencies (fastapi, uvicorn)
+    src/orderapi/main.py            FastAPI app: wiring and error mapping
+    src/orderapi/router.py          the endpoints, mounted at /orders
+    src/orderapi/service.py         policy: a missing order is OrderNotFound
+    src/orderapi/repository.py      the SQL, one function per operation
+    src/orderapi/schemas.py         request/response models
+    src/orderapi/models.py          the Order entity
+    src/orderapi/exceptions.py      OrderNotFound
+    src/orderapi/dependencies.py    get_db and the Db annotation
+    src/orderapi/db.py              connection + forward-only migration runner
+    src/orderapi/migrate.py         `python -m orderapi.migrate`, run by `make migrate`
+    src/orderapi/migrations/        0001 schema, 0002 seed data
 Makefile                    `make` prints the available targets
 ```
 
